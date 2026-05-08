@@ -199,7 +199,10 @@ async function sendMessage() {
   document.getElementById('typing').classList.add('visible');
 
   try {
-    const response = await puter.ai.chat(SYSTEM_PROMPT, text);
+    const response = await puter.ai.chat([
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...conversationHistory
+    ]);
 
     // Robustly extract text from any Puter.js response shape
     let reply = '';
