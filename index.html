@@ -186,9 +186,12 @@ async function sendMessage() {
   document.getElementById('typing').classList.add('visible');
 
   try {
-    // UPDATED: Using puter.ai.chat for free access without exposed keys
-    const response = await puter.ai.chat(SYSTEM_PROMPT + "\n\nUser Question: " + text);
-    const reply = response.toString();
+    // UPDATED: Proper handling of the Puter AI response object
+    const response = await puter.ai.chat(SYSTEM_PROMPT, text);
+    
+    // Puter's response object structure usually requires accessing the text content
+    // We check if it's an object/array and extract the message accordingly
+    const reply = response.message ? response.message.content : response.toString();
     
     conversationHistory.push({ role: 'assistant', content: reply });
     appendMessage(reply, 'agent');
