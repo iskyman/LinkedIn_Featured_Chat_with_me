@@ -199,12 +199,27 @@ async function sendMessage() {
   document.getElementById('typing').classList.add('visible');
 
   try {
-    // UPDATED: Proper handling of the Puter AI response object
     const response = await puter.ai.chat(SYSTEM_PROMPT, text);
-    
-    // Puter's response object structure usually requires accessing the text content
-    // We check if it's an object/array and extract the message accordingly
-    const reply = response.message ? response.message.content : response.toString();
+
+    // Robustly extract text from any Puter.js response shape
+    let reply = '';
+    if (typeof response === 'string') {
+      reply = response;
+    } else if (response?.message?.content) {
+      const content = response.message.content;
+      if (typeof content === 'string') {
+        reply = content;
+      } else if (Array.isArray(content)) {
+        reply = content.map(block => block?.text ?? '').join('');
+      }
+    } else if (response?.text) {
+      reply = response.text;
+    } else if (response?.choices?.[0]?.message?.content) {
+      reply = response.choices[0].message.content;
+    } else {
+      reply = JSON.stringify(response);
+    }
+    reply = reply.trim() || 'Sorry, I received an empty response.';
     
     conversationHistory.push({ role: 'assistant', content: reply });
     appendMessage(reply, 'agent');
